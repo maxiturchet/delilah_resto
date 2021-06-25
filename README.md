@@ -33,8 +33,7 @@ y arrastrarlos a tu editor de código.
 
 Estando en el editor de código con el repositorio agregado, abrir la terminal en la carpeta [Server](https://github.com/maxiturchet/delilah_resto/tree/main/server). 
 Podés hacer esto haciendo click derecho en el archivo y presionando en la opción "Open in integrated Terminal".
-
-### Agregar carpeta node_modules para disponer de los paquetes necesarios con [NPM](https://www.npmjs.com/)
+Para poder agregar la carpeta "node_modules" y disponer de los paquetes necesarios para usar el servicio tenés que escribir en la terminal:
 
 `npm i`
 
