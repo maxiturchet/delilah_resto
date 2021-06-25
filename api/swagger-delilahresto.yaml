@@ -1,0 +1,673 @@
+swagger: "2.0"
+info:
+  description: "Este documento contiene la especificación para acceder y utilizar la API de Delilah-Restó."
+  version: "1.0.0"
+  title: "Delilah Restó"
+  contact:
+    email: "maxiturchet@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.github.com/maxiturchet/delilah-resto"
+
+tags:
+  - name: "usuarios"
+    description: "Operaciones del usuario: registro, login y cambios"
+  - name: "platos"
+    description: "Contiene los platos disponibles del restaurante"
+  - name: "ordenes"
+    description: "Acceso a las ordenes del restaurante"
+schemes:
+  - "https"
+  - "http"
+
+paths:
+  /usuarios:
+    get:
+      tags:
+        - "usuarios"
+      summary: "Devuelve la lista de usuarios (solo admin)"
+      description: "Devuelve la lista de todos los usuarios registrados"
+      operationId: "getUsuarios"
+      produces:
+        - "application/json"
+      parameters: 
+        - in: "header"
+          name: "autorización"
+          description: "Token de autenticación"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Usuario ha sido eliminado."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/usuarios"
+        403:
+          description: "No tiene los permisos necesarios"
+  
+  /usuarios/registro:  
+    post:
+      tags:
+        - "usuarios"
+      summary: "Registra un nuevo usuario"
+      operationId: "postUsuario"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Objeto para registrar usuario"
+          required: true
+          schema:
+            $ref: "#/definitions/registro_usuario"
+      responses:
+        201:
+          description: "El usuario ha sido ingresado."
+        400:
+          description: "Parámetros incorrectos o faltantes"
+        409:
+          description: "Nombre de usuario ya está en uso"
+  
+  /usuarios/ingreso:
+    post:
+      tags:
+        - "usuarios"
+      summary: "Ingreso de un usuario (solo usuarios registrados)"
+      description: ""
+      operationId: "ingresoUsuario"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "credenciales"
+          in: "body"
+          description: "El nombre de usuario y contraseña para ingresar"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              usuario:
+                type: "string"
+              password:
+                type: "string"
+      responses:
+        200:
+          description: "Token"
+          schema:
+            type: "string"
+            example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjoibWljYXJpdmFyb2xhIiwiZW1haWwiOiJtaWNhcml2YXJvbGFAZGVsaWxhaC5jb20iLCJpYXQiOjE2MjQyNzEzMTUsImV4cCI6MTYyNDI3MTYxNX0.h8yaDonxxOBrVN7gYZ99y4I87AqRkzhh86xyebhr8j0"
+        400:
+          description: "Usuario o contraseña inválidos o inexistentes"
+
+  /usuarios/{:id}:
+    get:
+      tags:
+        - "usuarios"
+      summary: "Obtener usuario por id (solo admin)"
+      description: "Obtener un usuario por su Id"
+      operationId: "obtenerUsuarioPorId"
+      produces:
+        - "application/json"
+      parameters: 
+        - name: ":id"
+          in: "path"
+          description: "Id del usuario"
+          required: true
+          type: "integer"
+          format: "int64"
+        - in: "header"
+          name: "autorización"
+          description: "Token de autenticación"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Operacion exitosa"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/usuarios"
+        403:
+          description: "No tiene los permisos necesarios"
+          
+    delete:
+      tags:
+        - "usuarios"
+      summary: "Elimina un usuario (solo admin)"
+      description: "Elimina a un usuario por su Id"
+      operationId: "borrarUsuario"
+      produces:
+        - "application/json"
+      parameters: 
+        - name: ":id"
+          in: "path"
+          description: "Id del usuario"
+          required: true
+          type: "integer"
+          format: "int64"
+        - in: "header"
+          name: "autorización"
+          description: "Token de autenticación"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "El usuario ha sido eliminado"
+        400:
+          description: "Ha ocurrido un error al intentar eliminar al usuario"
+        403:
+          description: "No tiene los permisos necesarios"
+        404:
+          description: "El usuario que intenta eliminar no existe"
+
+  /platos:
+    get:
+      tags:
+        - "platos"
+      summary: "Lista de platos"
+      description: "Devuelve la lista de todos los platos"
+      operationId: "obtenerPlatos"
+      produces:
+        - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/plato_almacenado"
+  
+    post:
+      tags:
+        - "platos"
+      summary: "Añadir un nuevo plato (solo admin)"
+      operationId: "postPlato"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "header"
+          name: "authorization"
+          description: "Token de autenticación"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Objeto de producto para almacenar"
+          required: true
+          schema:
+            $ref: "#/definitions/plato_subido"
+      responses:
+        201:
+          description: "Plato creado"
+        400:
+          description: "Parámetros incorrectos o faltantes."
+        409:
+          description: "El plato que intenta ingresar ya existe."
+          
+    put:
+      tags:
+        - "platos"
+      summary: "Actualizar un plato (solo admin)"
+      description: "Cambiar campos del plato"
+      operationId: "putPlato"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "header"
+          name: "authorization"
+          description: "Token de autenticación"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Campos del producto que se actualizarán"
+          required: true
+          schema:
+            $ref: "#/definitions/plato_modificado"
+      responses:
+        200:
+          description: "Plato modificado exitosamente"
+        403:
+          description: "No tiene los permisos necesarios"
+        404:
+          description: "Plato no encontrado"
+  
+  
+  /platos/{:id}:
+    delete:
+      tags:
+        - "platos"
+      summary: "Eliminar un plato (solo admin)"
+      description: "elimina un plato"
+      operationId: "deleteProduct"
+      produces:
+        - "application/json"
+      parameters:
+        - name: ":id"
+          in: "path"
+          description: "Id del producto que se borrará"
+          required: true
+          type: "integer"
+        - in: "header"
+          name: "authorization"
+          description: "Token de autenticación"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "El plato ha sido eliminado."
+        403:
+          description: "No tiene los permisos necesarios"
+        404:
+          description: "Plato no encontrado"
+
+  /ordenes:
+    get:
+      tags:
+        - "ordenes"
+      summary: "Devuelve la lista de ordenes (solo admin)"
+      operationId: "getOrdenes"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "header"
+          name: "authorization"
+          description: "Token de autenticación"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/ordenes_listado"
+        403:
+          description: "No tiene los permisos necesarios"
+
+    post:
+      tags:
+        - "ordenes"
+      summary: "Hacer un pedido (solo usuarios registrados)"
+      description: "Hacer un pedido"
+      operationId: "postOrder"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "header"
+          name: "autorización"
+          description: "Token de autenticación"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Orden que se añadirá"
+          required: true
+          schema:
+            $ref: "#/definitions/orden_enviada"
+      responses:
+        201:
+          description: "Nueva orden realizada."
+        400:
+          description: "Parámetros Incorrectos"  
+        401:
+          description: "Usuario o contraseña incorrectos."
+
+    put:
+      tags:
+        - "ordenes"
+      summary: "Actualizar el estado de una orden (solo admin)"
+      description: "Cambiar el estado de un pedido. Los diferentes estados son: ['Nuevo', 'Confirmado', 'Preparando', 'Enviando', 'Entregado', 'Cancelado'];"
+      operationId: "putCambiarEstadoOrden"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "header"
+          name: "authorization"
+          description: "Token de autenticación"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "Actualización del estado"
+          required: true
+          schema:
+            $ref: "#/definitions/estado_orden"
+      responses:
+        200:
+          description: "Estado de la orden actualizado"
+        400:
+          description: "El estado que intenta ingresar es inválido o ya está en uso"    
+        403:
+          description: "No tiene los permisos necesarios"
+
+  /ordenes/usuario/{:nombre}:
+    get:
+      tags:
+        - "ordenes"
+      summary: "Devuelve el detalle de las ordenes del usuario (solo usuario logeado)"
+      description: "Ordenes del usuario"
+      operationId: "getOrder"
+      produces:
+        - "application/json"
+      parameters:
+        - name: ":nombre"
+          in: "path"
+          description: "nombre del usuario"
+          required: true
+          type: "string"
+        - in: "header"
+          name: "authorization"
+          description: "Token de autenticación"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/orden_completa_usuario"
+        400:
+          description: "El usuario no tiene ordenes realizadas`"
+        403:
+          description: "El token no coincide con el usuario"
+          
+  /ordenes/{:id}:
+    get:
+      tags:
+        - "ordenes"
+      summary: "Devuelve el detalle de una orden específica (solo admin)"
+      description: "Homepage del admin"
+      operationId: "getOrderId"
+      produces:
+        - "application/json"
+      parameters:
+        - name: ":id"
+          in: "path"
+          description: "ID del producto"
+          required: true
+          type: "integer"
+        - in: "header"
+          name: "authorization"
+          description: "Token de autenticación"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Ok"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/orden_completa"
+        400:
+          description: "Parámetros incorrectos o faltantes"
+        403:
+          description: "No tiene los permisos necesarios"
+          
+    delete:
+      tags:
+        - "ordenes"
+      summary: "Elimina una orden (solo admin)"
+      description: "Elimina una orden(admin)"
+      operationId: "deleteOrder"
+      produces:
+        - "application/json"
+      parameters:
+        - name: ":id"
+          in: "path"
+          description: "ID de la orden"
+          required: true
+          type: "integer"
+        - in: "header"
+          name: "authorization"
+          description: "Token de autenticación"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Orden ha sido eliminada con éxito"
+        400:
+          description: "Ha ocurrido un error al intentar eliminar la orden"
+        403:
+          description: "No tiene los permisos necesarios"
+  
+definitions:
+
+  usuarios:
+    type: "object"
+    properties:
+      id_usuario:
+        type: "number"
+      usuario:
+        type: "string"
+      nombre_completo:
+        type: "string"
+      email:
+        type: "string"
+      telefono:
+        type: "string"
+      direccion:
+        type: "string"
+      password:
+        type: "string"
+
+  registro_usuario:
+    type: "object"
+    properties:
+      usuario:
+        type: "string"
+      nombre:
+        type: "string"
+      email:
+        type: "string"  
+      telefono:
+        type: "string"
+      direccion:
+        type: "string"
+      password:
+        type: "string"
+
+  plato_almacenado:
+    type: "object"
+    properties:
+      id_plato:
+        type: "integer"
+        format: "int64"
+      nombre_plato:
+        type: "string"
+        example: "hamburguesa clasica"
+      precio:
+        type: "number"
+      img_url:
+        type: "string"
+      descripcion:
+        type: "string"
+  
+  plato_subido:
+    type: "object"
+    required:
+      - "id_plato"
+      - "nombre"
+      - "precio"
+      - "img"
+      - "descripcion"
+    properties:
+      nombre:
+        type: "string"
+        example: "bagel de salmon"
+      precio:
+        type: "number"
+      img:
+        type: "string"
+      descripcion:
+        type: "string"
+
+  plato_modificado:
+    type: "object"
+    required:
+      - "id_plato"
+      - "nombre"
+      - "precio"
+      - "img"
+      - "descripcion"
+    properties:
+      id_plato:
+        type: "string"
+      nombre:
+        type: "string"
+        example: "bagel de salmon"
+      precio:
+        type: "number"
+      img:
+        type: "string"
+      descripcion:
+        type: "string"
+        
+  orden_enviada:
+    type: "object"
+    properties:
+      usuario:
+        type: "string"
+      platos:
+        type: "string"
+        description: "la cantidad de unidades debe estar al principio del plato seguido de una 'x' y separada del plato por un espacio. El nombre del plato debe ser escrito exactamente, sin tildes ni mayúsculas. Cada plato se separa con una ',' y no debe haber espacios entre la ',' y el siguiente plato."
+        example: "1x bagel de salmon,1x hamburguesa clasica"
+      medioDePago:
+        type: "string"
+        description: "forma de pago (efectivo, tarjeta, transferencia)"
+
+
+  ordenes_listado:
+    type: "object"
+    properties:
+      id_orden:
+        type: "number"
+      estado:
+        type: "string"
+        enum:
+          - "Nuevo"
+          - "Confirmado"
+          - "Preparando"
+          - "enviando"
+          - "Entregado"
+          - "Cancelado"
+      hora:
+        type: "string"
+        example: "15:34:02"
+      descripcion:
+        type: "string"
+        example: "1x bagel de salmon,1x hamburguesa clasica"
+      total:
+        type: "number"
+      medio_pago:
+        type: "string"
+        description: "forma de pago (efectivo, tarjeta, transferencia)"
+      id_usuario:
+        type: "number"
+
+  estado_orden:
+    type: "object"
+    properties:
+      id_orden: 
+        type: "integer"
+      estado:
+        type: "string"
+        description: "estado del pedido"
+        enum:
+          - "Nuevo"
+          - "Confirmado"
+          - "Preparando"
+          - "enviando"
+          - "Entregado"
+          - "Cancelado"
+          
+  orden_completa_usuario:
+    type: "object"
+    properties:
+      usuario: 
+        type: "string"
+      direccion:
+        type: "string"
+      email: 
+        type: "string"
+      telefono: 
+        type: "string"
+      estado:
+        type: "string"
+        enum:
+          - "Nuevo"
+          - "Confirmado"
+          - "Preparando"
+          - "enviando"
+          - "Entregado"
+          - "Cancelado"  
+      total: 
+        type: "integer"
+      medio_pago:
+        type: "string"
+      platos:
+        type: "array"
+        items:
+          $ref: "#/definitions/platos_detalle"
+          
+  orden_completa:
+    type: "object"
+    properties:
+      usuario: 
+        type: "string"
+      direccion:
+        type: "string"
+      email: 
+        type: "string"
+      telefono: 
+        type: "string"
+      estado:
+        type: "string"
+        enum:
+          - "Nuevo"
+          - "Confirmado"
+          - "Preparando"
+          - "enviando"
+          - "Entregado"
+          - "Cancelado"  
+      total: 
+        type: "integer"
+      medio_pago:
+        type: "string"
+      platos:
+        type: "array"
+        items:
+          $ref: "#/definitions/platos_detalle"
+
+  platos_detalle:
+        type: "object"
+        properties:
+          id_plato:
+              type: "integer"
+          nombre_plato: 
+              type: "string"
+          precio_plato:
+              type: "integer"
+          img_url: 
+              type: "string"
+          descripcion: 
+              type: "string"
+          id_ordenes_platos:
+              type: "integer"
+          id_orden: 
+              type: "integer"
+          cantidad_platos: 
+              type: "integer"
+  
