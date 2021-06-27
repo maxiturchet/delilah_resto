@@ -344,7 +344,7 @@ async function obtenerOrdenPorId (id){
 async function cambiarEstadoOrden(req, res, next){
     try{ 
         const {id_orden, estado} = req.body;
-        const encontrarId = await buscarOrden(id_orden);
+        const encontrarId = await obtenerOrdenPorId(id_orden);
         if(estadoOrden.indexOf(estado) >= 0 && encontrarId.length >= 0 && estado != encontrarId[0].estado){
             const cambiarEstado = await myDataBase.sequelize.query(`UPDATE ordenes SET estado = '${estado}' WHERE id_orden = '${id_orden}'`);
             res.id = id_orden;
